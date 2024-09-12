@@ -12,7 +12,12 @@ import (
 
 const BASE_URL = "https://crt.sh/atom"
 
-func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
+type CertificateEntry struct {
+	ID          string
+	Certificate *x509.Certificate
+}
+
+func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 	u, err := url.Parse(BASE_URL)
 	if err != nil {
 		return nil, errors.Join(ErrorParseURL, err)
@@ -28,7 +33,7 @@ func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 		return nil, errors.Join(ErrorFetchRSS, err)
 	}
 
-	var certs []*x509.Certificate
+	var entries []CertificateEntry
 	for _, item := range feed.Items {
 		desc := strings.NewReader(item.Description)
 		node, err := html.Parse(desc)
@@ -44,8 +49,11 @@ func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 			return nil, err
 		}
 
-		certs = append(certs, c)
+		entries = append(entries, CertificateEntry{
+			ID:          item.GUID,
+			Certificate: c,
+		})
 	}
 
-	return certs, nil
+	return entries, nil
 }
