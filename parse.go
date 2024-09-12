@@ -3,13 +3,13 @@ package main
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
 
+	"github.com/cockroachdb/errors"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
-func parseHTML(first *html.Node) string {
+func parseHTMLElement(first *html.Node) string {
 	d := ""
 
 	for c := first; c != nil; c = c.NextSibling {
@@ -28,12 +28,12 @@ func parseHTML(first *html.Node) string {
 func ParseCertificate(src string) (*x509.Certificate, error) {
 	block, _ := pem.Decode([]byte(src))
 	if block == nil {
-		return nil, fmt.Errorf("failed to decode PEM block")
+		return nil, ErrorParsePEM
 	}
 
 	data, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrorParseCertificate, err)
 	}
 
 	return data, nil

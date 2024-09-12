@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	"github.com/mmcdole/gofeed"
 	"golang.org/x/net/html"
 )
@@ -15,7 +16,7 @@ const BASE_URL = "https://crt.sh/atom"
 func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 	u, err := url.Parse(BASE_URL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrorParseURL, err)
 	}
 
 	query := u.Query()
@@ -25,17 +26,20 @@ func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 
 	feed, err := gofeed.NewParser().ParseURL(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrorFetchRSS, err)
 	}
 
 	var certs []*x509.Certificate
 	for _, item := range feed.Items {
 		desc := strings.NewReader(item.Description)
-		node, _ := html.Parse(desc)
+		node, err := html.Parse(desc)
+		if err != nil {
+			return nil, errors.Join(ErrorParseHTML, err)
+		}
 
 		first := node.LastChild.LastChild.LastChild.FirstChild
 
-		s := parseHTML(first)
+		s := parseHTMLElement(first)
 		c, err := ParseCertificate(s)
 		if err != nil {
 			return nil, err
@@ -44,7 +48,7 @@ func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 		certs = append(certs, c)
 	}
 
-	return certs, err
+	return certs, nil
 }
 
 func main() {
