@@ -1,0 +1,3 @@
+package crtsh
+
+func Main() {}
