@@ -12,10 +12,6 @@ import (
 
 const BASE_URL = "https://crt.sh/atom"
 
-type CrtSH struct {
-	*gofeed.Parser
-}
-
 func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 	u, err := url.Parse(BASE_URL)
 	if err != nil {
