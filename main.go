@@ -25,7 +25,7 @@ func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 
 	query := u.Query()
 	query.Add("q", domain)
-	query.Add("exclude", domain)
+	query.Add("exclude", exclude)
 	u.RawQuery = query.Encode()
 
 	feed, err := gofeed.NewParser().ParseURL(u.String())
