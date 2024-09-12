@@ -13,14 +13,14 @@ import (
 const BASE_URL = "https://crt.sh/atom"
 
 type CertificateEntry struct {
-	ID          string
+	ID          int
 	Certificate *x509.Certificate
 }
 
 func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 	u, err := url.Parse(BASE_URL)
 	if err != nil {
-		return nil, errors.Join(ErrorParseURL, err)
+		return nil, errors.Join(ErrorParseIdUrl, err)
 	}
 
 	query := u.Query()
@@ -30,7 +30,7 @@ func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 
 	feed, err := gofeed.NewParser().ParseURL(u.String())
 	if err != nil {
-		return nil, errors.Join(ErrorFetchRSS, err)
+		return nil, errors.Join(ErrorFetchRss, err)
 	}
 
 	var entries []CertificateEntry
@@ -38,19 +38,24 @@ func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 		desc := strings.NewReader(item.Description)
 		node, err := html.Parse(desc)
 		if err != nil {
-			return nil, errors.Join(ErrorParseHTML, err)
+			return nil, errors.Join(ErrorParseHtml, err)
 		}
 
 		first := node.LastChild.LastChild.LastChild.FirstChild
 
 		s := parseHTMLElement(first)
-		c, err := ParseCertificate(s)
+		c, err := parseCertificate(s)
+		if err != nil {
+			return nil, err
+		}
+
+		id, err := parseID(item.Link)
 		if err != nil {
 			return nil, err
 		}
 
 		entries = append(entries, CertificateEntry{
-			ID:          item.GUID,
+			ID:          id,
 			Certificate: c,
 		})
 	}

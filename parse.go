@@ -3,6 +3,8 @@ package crtsh
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"net/url"
+	"strconv"
 
 	"github.com/cockroachdb/errors"
 	"golang.org/x/net/html"
@@ -25,10 +27,10 @@ func parseHTMLElement(first *html.Node) string {
 	return d
 }
 
-func ParseCertificate(src string) (*x509.Certificate, error) {
+func parseCertificate(src string) (*x509.Certificate, error) {
 	block, _ := pem.Decode([]byte(src))
 	if block == nil {
-		return nil, ErrorParsePEM
+		return nil, ErrorParsePem
 	}
 
 	data, err := x509.ParseCertificate(block.Bytes)
@@ -37,4 +39,19 @@ func ParseCertificate(src string) (*x509.Certificate, error) {
 	}
 
 	return data, nil
+}
+
+func parseID(src string) (int, error) {
+	u, err := url.Parse(src)
+	if err != nil {
+		return 0, errors.Join(ErrorParseIdUrl, err)
+	}
+
+	idQuery := u.Query().Get("id")
+	id, err := strconv.Atoi(idQuery)
+	if err != nil {
+		return 0, errors.Join(ErrorParseInt, err)
+	}
+
+	return id, nil
 }
