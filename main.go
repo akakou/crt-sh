@@ -17,6 +17,10 @@ type CertificateEntry struct {
 	Certificate *x509.Certificate
 }
 
+const (
+	EXCLUDE_EXPIRED = "expired"
+)
+
 func Fetch(domain, exclude string) ([]CertificateEntry, error) {
 	u, err := url.Parse(BASE_URL)
 	if err != nil {

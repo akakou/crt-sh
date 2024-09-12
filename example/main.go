@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	data, err := crtsh.Fetch("test.ochano.co", "expired")
+	data, err := crtsh.Fetch("test.ochano.co", crtsh.EXCLUDE_EXPIRED)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
