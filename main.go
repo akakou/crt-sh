@@ -1,8 +1,7 @@
-package main
+package crtsh
 
 import (
 	"crypto/x509"
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -49,13 +48,4 @@ func Fetch(domain, exclude string) ([]*x509.Certificate, error) {
 	}
 
 	return certs, nil
-}
-
-func main() {
-	data, err := Fetch("test.ochano.co", "expired")
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-	}
-
-	fmt.Printf("Data: %v\n", data)
 }

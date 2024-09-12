@@ -1,4 +1,4 @@
-package main
+package crtsh
 
 import "github.com/pkg/errors"
 
